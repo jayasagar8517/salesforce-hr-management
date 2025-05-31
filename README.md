@@ -38,9 +38,3 @@ A Salesforce-based HR Management solution with Lightning Web Components (LWC), s
 - **Custom Metadata and Objects**
 
 ---
-
-## Setup Instructions
-
-1. Authenticate with your Salesforce Org:
-   ```bash
-   sfdx force:auth:web:login -a HROrg
