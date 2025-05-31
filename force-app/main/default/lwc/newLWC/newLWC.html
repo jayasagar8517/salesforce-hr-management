@@ -1,0 +1,207 @@
+<template>
+    <div role="application">
+        <lightning-card title="HR Management System">
+            <div class="slds-p-around_medium">
+                <h2 class="slds-text-heading_medium slds-m-bottom_medium">HUMAN RESOURCES</h2>
+                <div class="main-container">
+                    <div class="options-container">
+                        <template for:each={optionStates} for:item="option">
+                            <div key={option.value} class="option-section" data-value={option.value}>
+                                <img src={option.icon} alt={option.label} class="option-icon">
+                                <span class="option-label">{option.label}</span>
+                                <lightning-input type="radio" name="options" value={option.value}
+                                    checked={option.isSelected} onchange={handleOptionChange}
+                                    class="radio-button"></lightning-input>
+                            </div>
+                        </template>
+                    </div>
+
+                    <template if:false={selectedOption}>
+                        <div class="slds-text-align_center slds-p-around_medium data-section">
+                            <p>Please select a section to begin.</p>
+                        </div>
+                    </template>
+
+                    <template if:true={showRecruitment}>
+                        <div class="slds-box slds-theme_default slds-p-around_medium data-section">
+                            <lightning-input name="firstName" label="First Name" class="slds-m-bottom_small"
+                                onchange={handleInputChange} required></lightning-input>
+                            <lightning-input name="lastName" label="Last Name" class="slds-m-bottom_small"
+                                onchange={handleInputChange} required></lightning-input>
+                            <lightning-input name="email" label="Email" type="email" class="slds-m-bottom_small"
+                                onchange={handleInputChange} required></lightning-input>
+                            <lightning-input name="mobile" label="Mobile Number" type="tel" class="slds-m-bottom_small"
+                                onchange={handleInputChange} required></lightning-input>
+                            <lightning-combobox name="department" label="Department" value={department}
+                                options={departmentOptions} onchange={handleInputChange} class="slds-m-bottom_small"
+                                required>
+                            </lightning-combobox>
+                            <lightning-input name="totalCtc" label="Total CTC"
+                                onchange={handleInputChange} required></lightning-input>
+                            <lightning-input name="joiningDate" label="Joining Date" type="date"
+                                onchange={handleInputChange} required></lightning-input>
+                            <lightning-input name="address" label="Address" class="slds-m-bottom_small"
+                                onchange={handleInputChange} required></lightning-input>
+                            <lightning-button label="Add Employee" variant="brand"
+                                onclick={handleAddEmployee} required></lightning-button>
+                        </div>
+                    </template>
+                    <template if:true={showEmployees}>
+                        <div class="slds-box slds-theme_default slds-p-around_medium data-section">
+                            <template if:true={employees}>
+                                <lightning-datatable key-field="Id" data={employees} columns={employeeColumns}
+                                    hide-checkbox-column="true">
+                                </lightning-datatable>
+                            </template>
+                            <template if:false={employees}>
+                                <p class="slds-text-color_error">No employees found.</p>
+                            </template>
+                        </div>
+                    </template>
+
+                    <template if:true={showAttendance}>
+                        <div class="slds-box slds-theme_default slds-p-around_medium data-section">
+                            <template if:false={isLoggedIn}>
+                                <div>
+                                    <lightning-input name="loginEmail" label="Email" type="email"
+                                        class="slds-m-bottom_small" onchange={handleInputChange}>
+                                    </lightning-input>
+                                    <lightning-input name="password" label="Password" type="password"
+                                        class="slds-m-bottom_small" onchange={handleInputChange}>
+                                    </lightning-input>
+                                    <lightning-button label="Login" variant="brand" onclick={handleLogin}></lightning-button>
+
+
+                                    <lightning-button label="   Forgot Password?" variant="base"
+                                        onclick={handleForgotPasswordClick} class="slds-m-top_small">
+                                    </lightning-button>
+
+                                    <template if:true={showForgotPasswordModal}>
+                                        <section role="dialog" class="slds-modal slds-fade-in-open" tabindex="-1">
+                                            <div class="slds-modal__container">
+                                                <header class="slds-modal__header">
+                                                    <h2 class="slds-modal__title">Reset Password</h2>
+                                                </header>
+                                                <div class="slds-modal__content slds-p-around_medium">
+                                                    <lightning-input type="email" label="Registered Email"
+                                                        value={forgotPasswordEmail}
+                                                        onchange={handleForgotPasswordEmailChange}>
+                                                    </lightning-input>
+                                                </div>
+                                                <footer class="slds-modal__footer">
+                                                    <lightning-button variant="neutral" label="Cancel"
+                                                        onclick={closeForgotPasswordModal}></lightning-button>
+                                                    <lightning-button variant="brand" label="Send Password"
+                                                        onclick={submitForgotPassword} class="slds-m-left_small">
+                                                    </lightning-button>
+                                                </footer>
+                                            </div>
+                                        </section>
+                                        <div class="slds-backdrop slds-backdrop_open"></div>
+                                    </template>
+                                </div>
+                            </template>
+
+
+                            <template if:true={isLoggedIn}>
+                                <p class="slds-text-heading_medium slds-m-around_medium">
+                                    Welcome {completeName}
+                                </p>
+                                <div class="slds-grid slds-wrap slds-grid_vertical-align-center slds-m-around_medium">
+                            
+                                    <!-- Left Side: Leave Management -->
+                                    <div class="slds-col slds-size_1-of-12 slds-p-around_medium">
+                                        <button class="slds-button slds-button_brand slds-button_stretch" onclick={openLeaveManagementModal}>
+                                            Leave Management
+                                        </button>
+                                    </div>
+                            
+                                    <!-- Center Controls: Offer Letter, Dual Listbox, Payslip -->
+                                    <div class="slds-col slds-size_10-of-12 slds-grid slds-grid_align-center slds-grid_vertical-align-center slds-wrap slds-gutters slds-p-around_medium">
+                            
+                                        <lightning-button label="Offer Letter"
+                                            class="slds-m-right_small" onclick={generatePdfOfferLetter}>
+                                        </lightning-button>
+                            
+                                        <div style="min-width: 500px;">
+                                            <lightning-dual-listbox
+                                                name="monthSelector"
+                                                label="Select Months"
+                                                source-label="Available"
+                                                selected-label="Selected"
+                                                options={monthOptions}
+                                                value={selectedMonths}
+                                                onchange={handleMonthChange}>
+                                            </lightning-dual-listbox>
+                                        </div>
+                            
+                                        <lightning-button label="Download Payslips"
+                                            class="slds-m-left_small slds-m-right_small" onclick={downloadPayslips}>
+                                        </lightning-button>
+                            
+                                        <lightning-button label="Logout" variant="destructive"
+                                            class="slds-m-left_small" onclick={handleLogout}>
+                                        </lightning-button>
+                                    </div>
+                                </div>
+                            
+                                <!-- Modal -->
+                                <template if:true={isFlowVisible}>
+                                    <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+                                        <div class="slds-modal__container">
+                                            <header class="slds-modal__header">
+                                                <lightning-button-icon icon-name="utility:close" onclick={closeModal}
+                                                    alternative-text="Close" class="slds-modal__close" title="Close">
+                                                </lightning-button-icon>
+                                                <h2 class="slds-text-heading_medium">Leave Management Flow</h2>
+                                            </header>
+                                            <div class="slds-modal__content slds-p-around_medium">
+                                                <lightning-flow flow-api-name="LeaveManagementFlow"
+                                                    flow-input-variables={inputVariables}
+                                                    onstatuschange={handleFlowStatusChange}>
+                                                </lightning-flow>
+                                            </div>
+                                            <footer class="slds-modal__footer">
+                                                <lightning-button variant="neutral" label="Close"
+                                                    onclick={closeModal}></lightning-button>
+                                            </footer>
+                                        </div>
+                                    </section>
+                                    <div class="slds-backdrop slds-backdrop_open"></div>
+                                </template>
+                            
+                                <!-- Logout Time & Total Hours -->
+                                <template if:true={logoutTime}>
+                                    <div class="slds-m-around_medium">
+                                        <p><strong>Logout Time:</strong> {logoutTime}</p>
+                                        <p><strong>Total Hours Worked:</strong> {totalHours} hrs</p>
+                                    </div>
+                                </template>
+                            
+                                <!-- Attendance Table -->
+                                <lightning-card title="Attendance Tracking" class="slds-m-around_medium">
+                                    <template if:true={hasAttendanceRecords}>
+                                        <lightning-datatable key-field="Id" data={attendanceRecords}
+                                            columns={attendanceColumns} hide-checkbox-column="true"
+                                            sorted-by="Login_Time__c" sorted-direction="desc">
+                                        </lightning-datatable>
+                                    </template>
+                                    <template if:false={hasAttendanceRecords}>
+                                        <p class="slds-text-color_error slds-text-align_center slds-p-around_small">
+                                            No attendance records available.
+                                        </p>
+                                    </template>
+                                </lightning-card>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+
+                <template if:true={isLoggedIn}>
+                    <div class="slds-grid slds-grid_align-spread slds-m-top_medium">
+                        </div>
+                    </template>
+            </div>
+        </lightning-card>
+    </div>
+</template>
