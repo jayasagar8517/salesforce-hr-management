@@ -2,7 +2,7 @@
 
 A Salesforce-based HR Management solution with Lightning Web Components (LWC), supporting recruitment, employee records, attendance tracking, and more.
 
-🔗 [Live Demo Website](https://jayasagarmvn-dev-ed.develop.my.site.com/LWCAppvforcesite)
+🔗 [Link to HR Management Website](https://jayasagarmvn-dev-ed.develop.my.site.com/LWCAppvforcesite)
 
 ---
 
